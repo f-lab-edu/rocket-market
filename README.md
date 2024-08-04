@@ -13,10 +13,11 @@
 - **API 문서화 자동화**
 
 ## 🔎 프로젝트 구조
-(이미지)
+![rocket-marcket_아키텍처 drawio](https://github.com/user-attachments/assets/72efff7e-2761-4672-9d28-4888027e2709)
+
 
 ## 📌 ER Diagram
-![rocket-market-erd](https://github.com/user-attachments/assets/02c5e215-a7df-46b2-a2b1-6489ff342423)
+![rocket-market-erd](https://github.com/user-attachments/assets/1776233b-aae3-4c8c-948d-1e2d6e6a2739)
 
 ## 🔧 사용 기술 스택
 - Java
