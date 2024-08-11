@@ -41,4 +41,11 @@ public class Products {
     @LastModifiedDate
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
+
+    public void updateProduct(String name, String description, BigDecimal price, Categories category) {
+        this.name = name == null || name.isEmpty() ? this.name : name;
+        this.description = description == null ? this.description : description;
+        this.price = price == null ? this.price : price;
+        this.category = category == null ? this.category : category;
+    }
 }
