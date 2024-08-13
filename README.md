@@ -17,10 +17,10 @@
 
 
 ## 📌 ER Diagram
-![rocket-market-erd](https://github.com/user-attachments/assets/1776233b-aae3-4c8c-948d-1e2d6e6a2739)
+![rocket-market-erd2](https://github.com/user-attachments/assets/25318c80-8dc0-408c-8f1a-ef1ca86a7838)
 
 ## 🔧 사용 기술 스택
-- Java
-- Spring Boot
+- Java 17
+- Spring Boot 3.3.2
 - JPA
 - MySQL
