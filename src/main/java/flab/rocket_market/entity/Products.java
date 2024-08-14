@@ -1,6 +1,7 @@
 package flab.rocket_market.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import flab.rocket_market.global.util.ValueUtils;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -43,9 +44,9 @@ public class Products {
     private LocalDateTime updatedAt;
 
     public void updateProduct(String name, String description, BigDecimal price, Categories category) {
-        this.name = name == null || name.isEmpty() ? this.name : name;
-        this.description = description == null ? this.description : description;
-        this.price = price == null ? this.price : price;
-        this.category = category == null ? this.category : category;
+        this.name = ValueUtils.getNonNullValue(name, this.name);
+        this.description = ValueUtils.getNonNullValue(description, this.description);
+        this.price = ValueUtils.getNonNullValue(price, this.price);
+        this.category = ValueUtils.getNonNullValue(category, this.category);
     }
 }
