@@ -7,7 +7,7 @@ public class ProductNotFoundException extends RocketMarketException {
 
     public static final ProductNotFoundException EXCEPTION = new ProductNotFoundException();
 
-    public ProductNotFoundException() {
+    private ProductNotFoundException() {
         super(ProductErrorProperty.PRODUCT_NOTFOUNTD_EXCEPTION);
     }
 }
