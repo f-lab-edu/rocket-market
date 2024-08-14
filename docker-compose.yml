@@ -1,0 +1,45 @@
+services:
+  rocket-market-db:
+    container_name: rocket-market-db
+    image: mysql:latest
+    restart: always
+    volumes:
+      - mysql_volume:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123123
+      - MYSQL_DATABASE=rocket-market
+    ports:
+      - "3308:3306"
+    networks:
+      - docker-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  rocket-market-app:
+    container_name: rocket-market-app
+    ports:
+      - "8080:8080"
+    image: cheoneunjeong/rocket-market-api:1.0
+#    volumes:
+#      - rocket-market-images:/app/images
+    networks:
+      - docker-network
+    depends_on:
+      rocket-market-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://rocket-market-db:3306/rocket-market
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123123
+
+networks:
+  docker-network:
+    driver: bridge
+
+volumes:
+  mysql_volume:
+    driver: local
+#  rocket-market-images:
+#    driver: local
