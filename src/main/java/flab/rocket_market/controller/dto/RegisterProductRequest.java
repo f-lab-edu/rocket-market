@@ -1,10 +1,12 @@
 package flab.rocket_market.controller.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 
 @Getter
+@Builder
 public class RegisterProductRequest {
 
     private String name;
