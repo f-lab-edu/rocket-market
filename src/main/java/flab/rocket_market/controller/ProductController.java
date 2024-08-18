@@ -18,9 +18,9 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public BaseResponse registerProduct(@RequestBody RegisterProductRequest productRequest) {
-        productService.registerProduct(productRequest);
-        return BaseResponse.of(HttpStatus.CREATED, "성공적으로 등록되었습니다.");
+    public BaseDataResponse<ProductResponse> registerProduct(@RequestBody RegisterProductRequest productRequest) {
+        ProductResponse product = productService.registerProduct(productRequest);
+        return BaseDataResponse.of(HttpStatus.CREATED, "성공적으로 등록되었습니다.", product);
     }
 
     @GetMapping("/{productId}")
