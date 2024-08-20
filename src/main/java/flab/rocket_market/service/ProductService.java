@@ -22,7 +22,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
-    public void registerProduct(RegisterProductRequest productRequest) {
+    public ProductResponse registerProduct(RegisterProductRequest productRequest) {
         Categories category = getCategory(productRequest.getCategoryId());
 
         Products product = Products.builder()
@@ -32,7 +32,9 @@ public class ProductService {
                 .category(category)
                 .build();
 
-        productRepository.save(product);
+        Products savedProduct = productRepository.save(product);
+
+        return ProductResponse.of(savedProduct);
     }
 
     public ProductResponse getProductById(Long productId) {
