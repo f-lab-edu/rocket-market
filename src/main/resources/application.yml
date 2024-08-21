@@ -20,3 +20,8 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
     generate-ddl: true
+
+springdoc:
+  swagger-ui:
+    url: /docs/rocket-market-api - 0.0.1.json
+    path: /docs/swagger
