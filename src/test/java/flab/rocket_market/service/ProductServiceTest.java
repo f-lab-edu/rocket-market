@@ -29,6 +29,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
+    private static final Long DEFAULT_CATEGORY_ID = 1L;
+    private static final String DEFAULT_CATEGORY_NAME = "의류";
+    private static final String DEFAULT_CATEGORY_DESCRIPTION = "패션 의류";
+    private static final String DEFAULT_PRODUCT_NAME = "티셔츠";
+    private static final String DEFAULT_PRODUCT_DESCRIPTION = "티셔츠 입니다.";
+    private static final BigDecimal DEFAULT_PRODUCT_PRICE = BigDecimal.valueOf(5000);
+
     @Mock
     private CategoryRepository categoryRepository;
 
@@ -38,17 +45,12 @@ class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
-    private Categories categories;
+    private Categories defaultCategory;
     private LocalDateTime now;
 
     @BeforeEach
     void setUp() {
-        categories = Categories.builder()
-                .categoryId(1L)
-                .name("의류")
-                .description("패션 의류")
-                .build();
-
+        defaultCategory = createCategory(DEFAULT_CATEGORY_ID, DEFAULT_CATEGORY_NAME, DEFAULT_CATEGORY_DESCRIPTION);
         now = LocalDateTime.now();
     }
 
@@ -57,7 +59,7 @@ class ProductServiceTest {
     void getProductById() {
         //given
         Long productId = 1L;
-        Products product = createProduct(productId);
+        Products product = createProduct(productId, defaultCategory);
 
         //when
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
@@ -65,12 +67,11 @@ class ProductServiceTest {
         ProductResponse result = productService.getProductById(productId);
 
         //then
-        assertThat(result.getProductId()).isEqualTo(productId);
-        assertThat(result.getName()).isEqualTo("티셔츠");
+        assertProductResponse(result, productId, DEFAULT_PRODUCT_NAME, DEFAULT_CATEGORY_NAME);
     }
 
     @Test
-    @DisplayName("조회 품목이 없을 경우")
+    @DisplayName("단건 품목 조회 - 품목이 없는 경우 에러")
     void getProductById_NotFound() {
         //given
         Long productId = 2L;
@@ -86,38 +87,25 @@ class ProductServiceTest {
     @DisplayName("품목 저장")
     void registerProduct() {
         //given
-        RegisterProductRequest request = RegisterProductRequest.builder()
-                .name("티셔츠")
-                .description("티셔츠 입니다.")
-                .price(BigDecimal.valueOf(5000))
-                .categoryId(1L)
-                .build();
-
+        RegisterProductRequest request = createRegisterProductRequest(DEFAULT_PRODUCT_NAME, DEFAULT_PRODUCT_DESCRIPTION, DEFAULT_PRODUCT_PRICE, DEFAULT_CATEGORY_ID);
         Long productId = 1L;
-        Products savedProduct = createProduct(productId);
+        Products savedProduct = createProduct(productId, defaultCategory);
 
         //when
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(categories));
+        when(categoryRepository.findById(DEFAULT_CATEGORY_ID)).thenReturn(Optional.of(defaultCategory));
         when(productRepository.save(any(Products.class))).thenReturn(savedProduct);
 
         ProductResponse result = productService.registerProduct(request);
 
         //then
-        assertThat(result.getProductId()).isEqualTo(productId);
-        assertThat(result.getName()).isEqualTo("티셔츠");
-        assertThat(result.getCategoryName()).isEqualTo("의류");
+        assertProductResponse(result, productId, DEFAULT_PRODUCT_NAME, DEFAULT_CATEGORY_NAME);
     }
 
     @Test
-    @DisplayName("품목 저장 시 카테고리가 없을 경우")
+    @DisplayName("품목 저장 - 카테고리가 없는 경우 에러")
     void registerProduct_NotFoundCategory() {
         //given
-        RegisterProductRequest request = RegisterProductRequest.builder()
-                .name("티셔츠")
-                .description("티셔츠 입니다.")
-                .price(BigDecimal.valueOf(5000))
-                .categoryId(2L)
-                .build();
+        RegisterProductRequest request = createRegisterProductRequest(DEFAULT_PRODUCT_NAME, DEFAULT_PRODUCT_DESCRIPTION, DEFAULT_PRODUCT_PRICE, 2L);
 
         //when
         when(categoryRepository.findById(2L)).thenReturn(Optional.empty());
@@ -127,25 +115,14 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("품목 업데이트")
+    @DisplayName("품목 수정")
     void updateProduct() {
         //given
         Long productId = 1L;
-        Products product = createProduct(productId);
+        Products product = createProduct(productId, defaultCategory);
 
-        Categories newCategory = Categories.builder()
-                .name("식품")
-                .description("식품")
-                .categoryId(2L)
-                .build();
-
-        UpdateProductRequest request = UpdateProductRequest.builder()
-                .productId(productId)
-                .name("오렌지")
-                .description("오렌지 입니다.")
-                .categoryId(2L)
-                .price(BigDecimal.valueOf(3000))
-                .build();
+        Categories newCategory = createCategory(2L, "식품", "식품");
+        UpdateProductRequest request = createUpdateProductRequest(productId, "오렌지", "오렌지 입니다.", BigDecimal.valueOf(3000), 2L);
 
         //when
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(newCategory));
@@ -154,25 +131,32 @@ class ProductServiceTest {
         productService.updateProduct(request);
 
         //then
-        assertThat(product.getProductId()).isEqualTo(productId);
-        assertThat(product.getName()).isEqualTo("오렌지");
-        assertThat(product.getCategory()).isEqualTo(newCategory);
+        assertProductResponse(ProductResponse.of(product), productId, product.getName(), product.getCategory().getName());
     }
 
     @Test
-    @DisplayName("품목 업데이트 시 카테고리가 없는 경우")
+    @DisplayName("품목 수정 - 품목이 없는 경우 에러")
+    void updateProduct_NotFound() {
+        //given
+        Long productId = 2L;
+
+        UpdateProductRequest request = createUpdateProductRequest(productId, "오렌지", "오렌지 입니다.", BigDecimal.valueOf(3000), 2L);
+
+        //when
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+        //then
+        assertThrows(ProductNotFoundException.class, () -> productService.updateProduct(request));
+    }
+
+    @Test
+    @DisplayName("품목 수정 - 카테고리가 없는 경우 에러")
     void updateProduct_NotFoundCategory() {
         //given
         Long productId = 1L;
-        Products product = createProduct(productId);
+        Products product = createProduct(productId, defaultCategory);
 
-        UpdateProductRequest request = UpdateProductRequest.builder()
-                .productId(productId)
-                .name("오렌지")
-                .description("오렌지 입니다.")
-                .categoryId(2L)
-                .price(BigDecimal.valueOf(3000))
-                .build();
+        UpdateProductRequest request = createUpdateProductRequest(productId, "오렌지", "오렌지 입니다.", BigDecimal.valueOf(3000), 2L);
 
         //when
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
@@ -187,7 +171,7 @@ class ProductServiceTest {
     void deleteProduct() {
         //given
         Long productId = 1L;
-        Products product = createProduct(productId);
+        Products product = createProduct(productId, defaultCategory);
 
         //when
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
@@ -199,7 +183,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("삭제할 품목이 없는 경우")
+    @DisplayName("품목 삭제 - 품목이 없는 경우 에러")
     void deleteProduct_NotFound() {
         //given
         Long productId = 2L;
@@ -211,15 +195,48 @@ class ProductServiceTest {
         assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(productId));
     }
 
-    private Products createProduct(Long productId) {
+    private Categories createCategory(Long categoryId, String name, String description) {
+        return Categories.builder()
+                .categoryId(categoryId)
+                .name(name)
+                .description(description)
+                .build();
+    }
+
+    private Products createProduct(Long productId, Categories categories) {
         return Products.builder()
                 .productId(productId)
-                .name("티셔츠")
-                .description("티셔츠 입니다")
-                .price(BigDecimal.valueOf(5000))
+                .name(DEFAULT_PRODUCT_NAME)
+                .description(DEFAULT_PRODUCT_DESCRIPTION)
+                .price(DEFAULT_PRODUCT_PRICE)
                 .category(categories)
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
+    }
+
+    private RegisterProductRequest createRegisterProductRequest(String name, String description, BigDecimal price, Long categoryId) {
+        return RegisterProductRequest.builder()
+                .name(name)
+                .description(description)
+                .price(price)
+                .categoryId(categoryId)
+                .build();
+    }
+
+    private UpdateProductRequest createUpdateProductRequest(Long productId, String name, String description, BigDecimal price, Long categoryId) {
+        return UpdateProductRequest.builder()
+                .productId(productId)
+                .name(name)
+                .description(description)
+                .price(price)
+                .categoryId(categoryId)
+                .build();
+    }
+
+    private void assertProductResponse(ProductResponse response, Long expectedProductId, String expectedName, String expectedCategoryName) {
+        assertThat(response.getProductId()).isEqualTo(expectedProductId);
+        assertThat(response.getName()).isEqualTo(expectedName);
+        assertThat(response.getCategoryName()).isEqualTo(expectedCategoryName);
     }
 }
