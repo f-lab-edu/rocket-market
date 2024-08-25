@@ -35,12 +35,13 @@ pipeline {
 
         stage('Build') {
             steps {
+                sh 'chmod +x ./gradlew'
                 echo 'Build With gradlew'
                 sh './gradlew clean build'
             }
             post {
                 failure {
-                  error '[Build Gradle] This pipeline stops here...'
+                  error '[Build] This pipeline stops here...'
                 }
             }
         }
