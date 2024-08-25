@@ -19,9 +19,9 @@ pipeline {
                     DOCKER_HUB_URL = 'registry.hub.docker.com'
                     DOCKER_HUB_FULL_URL = 'https://' + DOCKER_HUB_URL
                     DOCKER_HUB_CREDENTIAL_ID = 'docker-hub-credentials-id'
-                    DOCKER_IMAGE_NAME = 'rocket-market-api'
+                    DOCKER_IMAGE_NAME = 'cheoneunjeong/rocket-market-api'
+                    DOCKER_IMAGE_TAG = 'latest'
                 }
-
             }
         }
 
@@ -33,21 +33,21 @@ pipeline {
             }
         }
 
-        stage('Build & Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Build & Push Docker Image'
-                withCredentials([usernamePassword(
-                        credentialsId: DOCKER_HUB_CREDENTIAL_ID,
-                        usernameVariable: 'DOCKER_HUB_ID',
-                        passwordVariable: 'DOCKER_HUB_PW')]) {
+                echo 'Build Docker Image'
+                script {
+                    docker.build(DOCKER_IMAGE_NAME + ':' + DOCKER_IMAGE_TAG)
+                }
+            }
+        }
 
-                    script {
-                        docker.withRegistry(DOCKER_HUB_FULL_URL,
-                                            DOCKER_HUB_CREDENTIAL_ID) {
-                        app = docker.build(DOCKER_HUB_ID + '/' + DOCKER_IMAGE_NAME)
-                        app.push(env.BUILD_ID)
-                        app.push('latest')
-                        }
+        stage('Push Docker Image') {
+            steps {
+                echo 'Push Docker Image'
+                script {
+                    docker.withRegistry(DOCKER_HUB_FULL_URL, DOCKER_HUB_CREDENTIAL_ID) {
+                        docker.image(DOCKER_IMAGE_NAME + ':' + DOCKER_IMAGE_TAG).push(DOCKER_IMAGE_TAG)
                     }
                 }
             }
