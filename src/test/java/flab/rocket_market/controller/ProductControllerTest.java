@@ -174,7 +174,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("단건 품목 조회 - 품목이 없는 경우 에러")
-    void getProductById_NotFound() throws Exception {
+    void getProductByIdNotFound() throws Exception {
         //given
         given(productService.getProductById(any())).willThrow(ProductNotFoundException.EXCEPTION);
 
@@ -196,7 +196,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("품목 저장 - 카테고리가 없는 경우 에러")
-    void registerProduct_NotFound() throws Exception {
+    void registerProductCategoryNotFound() throws Exception {
         //given
         RegisterProductRequest request = getRegisterProductRequest();
 
@@ -227,7 +227,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("품목 수정 - 품목이 없는 경우 에러")
-    void updateProduct_ProductNotFound() throws Exception {
+    void updateProductNotFound() throws Exception {
         //given
         UpdateProductRequest request = getUpdateProductRequest();
 
@@ -259,7 +259,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("품목 수정 - 카테고리가 없는 경우 에러")
-    void updateProduct_CategoryNotFound() throws Exception {
+    void updateProductCategoryNotFound() throws Exception {
         //given
         UpdateProductRequest request = getUpdateProductRequest();
 
@@ -291,7 +291,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("품목 삭제 - 품목이 없는 경우 에러")
-    void deleteProduct_NotFound() throws Exception {
+    void deleteProductNotFound() throws Exception {
         //given
         willThrow(ProductNotFoundException.EXCEPTION).given(productService).deleteProduct(any());
 
