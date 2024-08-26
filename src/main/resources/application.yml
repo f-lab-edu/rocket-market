@@ -6,9 +6,9 @@ spring:
     name: rocket-market
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/rocket-market}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:123123}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
@@ -23,5 +23,5 @@ spring:
 
 springdoc:
   swagger-ui:
-    url: /docs/rocket-market-api - 0.0.1.json
+    url: /docs/rocket-market-api-0.0.1.json
     path: /docs/swagger

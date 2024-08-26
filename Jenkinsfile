@@ -63,6 +63,19 @@ pipeline {
                 }
             }
         }
+
+         stage('Deploy with Docker Compose') {
+             steps {
+                    echo 'Deploy with Docker Compose'
+                     sh 'docker compose pull'
+                     sh 'docker compose up -d'
+                 }
+             post {
+                 failure {
+                   error '[Deploy] This pipeline stops here...'
+                 }
+             }
+         }
     }
 
     post {
