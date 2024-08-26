@@ -68,7 +68,7 @@ tasks.named('test') {
 
 //openapi3 {
 //	servers = [
-//			{ url = 'http://localhost:8081' }
+//			{ url = 'http://localhost:8080' }
 //	]
 //	title = 'Rocket Market API'
 //	description = 'Rocket Market API'
