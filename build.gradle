@@ -77,6 +77,10 @@ openapi3 {
 	format = 'json'
 
 	outputDirectory = 'build/resources/main/static/docs'
+
+	doFirst {
+		file(outputDirectory).mkdirs()
+	}
 }
 
 bootJar {
