@@ -7,13 +7,7 @@ pipeline {
                 echo 'Set Variables'
                 script {
                     // BASIC
-                    PROJECT_NAME = 'rocket-market'
                     REPOSITORY_URL = 'https://github.com/f-lab-edu/rocket-market.git'
-                    PROD_BRANCH = 'main'
-                    DEV_BRANCH = 'develop'
-                    FEATURE_BRANCH = 'feature/21'
-                    BRANCH_NAME = env.BRANCH_NAME
-                    OPERATION_ENV = BRANCH_NAME.equals(PROD_BRANCH) ? 'prod' : BRANCH_NAME.equals(DEV_BRANCH) ? 'dev' : 'feature'
 
                     // DOCKER
                     DOCKER_HUB_URL = 'registry.hub.docker.com'
@@ -57,7 +51,7 @@ pipeline {
                     script {
                         docker.withRegistry(DOCKER_HUB_FULL_URL, DOCKER_HUB_CREDENTIAL_ID) {
                             app = docker.build(DOCKER_HUB_ID + '/' + DOCKER_IMAGE_NAME)
-                            app.push('latest')
+                            app.push(DOCKER_IMAGE_TAG)
                         }
                     }
                 }
