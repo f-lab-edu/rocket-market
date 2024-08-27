@@ -52,33 +52,33 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-tasks.withType(GenerateSwaggerUI) {
-	// openapi3 테스크 이후에 실행 됨
-	dependsOn 'openapi3'
-
-	// 기존 파일 삭제
-	delete file('src/main/resources/static/docs/')
-
-	// 빌드된 JSON 파일을 복사
-	copy {
-		from "build/resources/main/static/docs"
-		into "src/main/resources/static/docs/"
-	}
-}
-
-openapi3 {
-	servers = [
-			{ url = 'http://localhost:8080' }
-	]
-	title = 'Rocket Market API'
-	description = 'Rocket Market API'
-	version = '0.0.1'
-	outputFileNamePrefix = 'rocket-market-api - 0.0.1'
-	format = 'json'
-
-	outputDirectory = 'build/resources/main/static/docs'
-}
-
-bootJar {
-	dependsOn(':openapi3')
-}
+//tasks.withType(GenerateSwaggerUI) {
+//	// openapi3 테스크 이후에 실행 됨
+//	dependsOn 'openapi3'
+//
+//	// 기존 파일 삭제
+//	delete file('src/main/resources/static/docs/')
+//
+//	// 빌드된 JSON 파일을 복사
+//	copy {
+//		from "build/resources/main/static/docs"
+//		into "src/main/resources/static/docs/"
+//	}
+//}
+//
+//openapi3 {
+//	servers = [
+//			{ url = 'http://localhost:8080' }
+//	]
+//	title = 'Rocket Market API'
+//	description = 'Rocket Market API'
+//	version = '0.0.1'
+//	outputFileNamePrefix = 'rocket-market-api-0.0.1'
+//	format = 'json'
+//
+//	outputDirectory = 'build/resources/main/static/docs'
+//}
+//
+//bootJar {
+//	dependsOn(':openapi3')
+//}
