@@ -20,6 +20,9 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
     generate-ddl: true
+  messages:
+    basename: message
+    encoding: UTF-8
 
 springdoc:
   swagger-ui:
