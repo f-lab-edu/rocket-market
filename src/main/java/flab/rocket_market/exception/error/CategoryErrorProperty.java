@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+import static flab.rocket_market.global.message.MessageConstants.CATEGORY_NOT_FOUND;
+
 @Getter
 @RequiredArgsConstructor
 public enum CategoryErrorProperty implements ErrorProperty {
 
-    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리가 존재하지 않습니다.");
+    CATEGORY_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, CATEGORY_NOT_FOUND.getMessage());
 
     private final HttpStatus status;
     private final String message;

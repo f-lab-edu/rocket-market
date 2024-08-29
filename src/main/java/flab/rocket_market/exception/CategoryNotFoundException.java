@@ -8,6 +8,6 @@ public class CategoryNotFoundException extends RocketMarketException {
     public static final CategoryNotFoundException EXCEPTION = new CategoryNotFoundException();
 
     private CategoryNotFoundException() {
-        super(CategoryErrorProperty.CATEGORY_NOT_FOUND);
+        super(CategoryErrorProperty.CATEGORY_NOT_FOUND_EXCEPTION);
     }
 }
