@@ -1,5 +1,6 @@
 package flab.rocket_market.service;
 
+import flab.rocket_market.controller.dto.PageResponse;
 import flab.rocket_market.controller.dto.ProductResponse;
 import flab.rocket_market.controller.dto.RegisterProductRequest;
 import flab.rocket_market.controller.dto.UpdateProductRequest;
@@ -10,8 +11,14 @@ import flab.rocket_market.exception.ProductNotFoundException;
 import flab.rocket_market.repository.CategoryRepository;
 import flab.rocket_market.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +70,20 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    public PageResponse<ProductResponse> getProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Products> productsPage = productRepository.findAll(pageable);
+
+        return getPageResponse(productsPage);
+    }
+
+    public PageResponse<ProductResponse> searchProducts(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Products> productsPage = productRepository.findByNameContaining(keyword, pageable);
+
+        return getPageResponse(productsPage);
+    }
+
     private Products getProduct(Long productId) {
         Products product = productRepository.findById(productId)
                 .orElseThrow(() -> ProductNotFoundException.EXCEPTION);
@@ -73,5 +94,20 @@ public class ProductService {
         Categories category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> CategoryNotFoundException.EXCEPTION);
         return category;
+    }
+
+    private PageResponse<ProductResponse> getPageResponse(Page<Products> productsPage) {
+        List<ProductResponse> productResponses = productsPage.getContent().stream()
+                .map(products -> ProductResponse.of(products))
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                productResponses,
+                productsPage.getNumber(),
+                productsPage.getSize(),
+                productsPage.getTotalElements(),
+                productsPage.getTotalPages(),
+                productsPage.isLast()
+        );
     }
 }
