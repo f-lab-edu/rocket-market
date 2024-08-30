@@ -12,8 +12,8 @@ public enum MessageConstants {
 
     CATEGORY_NOT_FOUND("카테고리가 존재하지 않습니다."),
     PRODUCT_NOT_FOUND("제품이 존재하지 않습니다."),
-
-    VALIDATION_FAILED("유효성 검사에 실패하였습니다.");
+    VALIDATION_FAILED("유효성 검사에 실패하였습니다."),
+    ACCESS_DENIED("접근 권한이 없습니다.");
 
     private final String message;
 
