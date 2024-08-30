@@ -76,7 +76,7 @@ pipeline {
                              ssh -o StrictHostKeyChecking=no ubuntu@13.209.195.235 '
                              echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_ID" --password-stdin &&
                              docker pull ${DOCKER_HUB_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} &&
-                             docker ps -q --filter name=rocket-market-app | grep -q . && docker rm -f \$(docker ps -aq --filter name=rocket-market-app) &&
+                             docker ps -a --filter name=rocket-market-app -q | xargs -r docker rm -f &&
                              docker run -d --name rocket-market-app -p 8080:8080 ${DOCKER_HUB_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
                          """
                      }
