@@ -68,7 +68,7 @@ pipeline {
                  echo 'Pull Docker Image & Docker Image Run'
                  sshagent (credentials: ['EC2_SSH']) {
                      withCredentials([usernamePassword(
-                         credentialsId: 'DOCKER_HUB_CREDENTIAL_ID',
+                         credentialsId: DOCKER_HUB_CREDENTIAL_ID,
                          usernameVariable: 'DOCKER_HUB_ID',
                          passwordVariable: 'DOCKER_HUB_PW')]) {
 
