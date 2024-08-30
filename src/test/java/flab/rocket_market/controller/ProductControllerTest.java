@@ -1,10 +1,10 @@
 package flab.rocket_market.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import flab.rocket_market.controller.dto.PageResponse;
-import flab.rocket_market.controller.dto.ProductResponse;
-import flab.rocket_market.controller.dto.RegisterProductRequest;
-import flab.rocket_market.controller.dto.UpdateProductRequest;
+import flab.rocket_market.dto.PageResponse;
+import flab.rocket_market.dto.ProductResponse;
+import flab.rocket_market.dto.RegisterProductRequest;
+import flab.rocket_market.dto.UpdateProductRequest;
 import flab.rocket_market.exception.CategoryNotFoundException;
 import flab.rocket_market.exception.ProductNotFoundException;
 import flab.rocket_market.service.ProductService;
