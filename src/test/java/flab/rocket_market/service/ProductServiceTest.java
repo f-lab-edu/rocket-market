@@ -72,7 +72,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("단건 품목 조회 - 품목이 없는 경우 에러")
-    void getProductById_NotFound() {
+    void getProductByIdNotFound() {
         //given
         Long productId = 2L;
 
@@ -103,7 +103,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("품목 저장 - 카테고리가 없는 경우 에러")
-    void registerProduct_NotFoundCategory() {
+    void registerProductCategoryNotFound() {
         //given
         RegisterProductRequest request = createRegisterProductRequest(DEFAULT_PRODUCT_NAME, DEFAULT_PRODUCT_DESCRIPTION, DEFAULT_PRODUCT_PRICE, 2L);
 
@@ -136,7 +136,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("품목 수정 - 품목이 없는 경우 에러")
-    void updateProduct_NotFound() {
+    void updateProductNotFound() {
         //given
         Long productId = 2L;
 
@@ -151,7 +151,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("품목 수정 - 카테고리가 없는 경우 에러")
-    void updateProduct_NotFoundCategory() {
+    void updateProductCategoryNotFound() {
         //given
         Long productId = 1L;
         Products product = createProduct(productId, defaultCategory);
@@ -184,7 +184,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("품목 삭제 - 품목이 없는 경우 에러")
-    void deleteProduct_NotFound() {
+    void deleteProductNotFound() {
         //given
         Long productId = 2L;
 
