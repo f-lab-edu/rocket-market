@@ -63,17 +63,20 @@ pipeline {
              }
         }
 
-         stage('Deploy with Docker Compose') {
+         stage('Docker Run') {
              steps {
-                    echo 'Deploy with Docker Compose'
-                     sh 'docker compose pull'
-                     sh 'docker compose up -d'
-                 }
-             post {
-                 failure {
-                   error '[Deploy] This pipeline stops here...'
+                 echo 'Pull Docker Image & Docker Image Run'
+                 sshagent (credentials: ['EC2_SSH']) {
+                     sh "ssh -o StrictHostKeyChecking=no ubuntu@13.209.195.235 'docker pull " + DOCKER_IMAGE_NAME +":"+ DOCKER_IMAGE_TAG+ "'"
+                     sh "ssh -o StrictHostKeyChecking=no ubuntu@13.209.195.235 'docker ps -q --filter name=rocket-market-app | grep -q . && docker rm -f \$(docker ps -aq --filter name=rocket-market-app)'"
+                     sh "ssh -o StrictHostKeyChecking=no ubuntu@13.209.195.235 'docker run -d --name rocket-market-app -p 8080:8080 " + DOCKER_IMAGE_NAME + ":" + DOCKER_IMAGE_TAG + "'"
                  }
              }
+             post {
+                  failure {
+                    error '[Docker Run] This pipeline stops here...'
+                  }
+              }
          }
     }
 
