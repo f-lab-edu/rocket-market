@@ -1,4 +1,4 @@
-package flab.rocket_market.controller.dto;
+package flab.rocket_market.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

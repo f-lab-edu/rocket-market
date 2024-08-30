@@ -1,9 +1,9 @@
 package flab.rocket_market.controller;
 
-import flab.rocket_market.controller.dto.PageResponse;
-import flab.rocket_market.controller.dto.ProductResponse;
-import flab.rocket_market.controller.dto.RegisterProductRequest;
-import flab.rocket_market.controller.dto.UpdateProductRequest;
+import flab.rocket_market.dto.PageResponse;
+import flab.rocket_market.dto.ProductResponse;
+import flab.rocket_market.dto.RegisterProductRequest;
+import flab.rocket_market.dto.UpdateProductRequest;
 import flab.rocket_market.global.response.BaseDataResponse;
 import flab.rocket_market.global.response.BaseResponse;
 import flab.rocket_market.service.ProductService;
