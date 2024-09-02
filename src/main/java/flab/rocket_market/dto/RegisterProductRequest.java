@@ -1,5 +1,6 @@
-package flab.rocket_market.controller.dto;
+package flab.rocket_market.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,12 +13,16 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateProductRequest {
+public class RegisterProductRequest {
 
-    @NotNull(message = "{product.id.notnull}")
-    private Long productId;
+    @NotBlank(message = "{product.name.notblank}")
     private String name;
+
     private String description;
+
+    @NotNull(message = "{product.price.notnull}")
     private BigDecimal price;
+
+    @NotNull(message = "{product.category.notnull}")
     private Long categoryId;
 }
