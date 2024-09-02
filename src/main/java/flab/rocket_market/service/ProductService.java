@@ -1,9 +1,10 @@
 package flab.rocket_market.service;
 
-import flab.rocket_market.controller.dto.PageResponse;
-import flab.rocket_market.controller.dto.ProductResponse;
-import flab.rocket_market.controller.dto.RegisterProductRequest;
-import flab.rocket_market.controller.dto.UpdateProductRequest;
+import flab.rocket_market.aop.RequiredRole;
+import flab.rocket_market.dto.PageResponse;
+import flab.rocket_market.dto.ProductResponse;
+import flab.rocket_market.dto.RegisterProductRequest;
+import flab.rocket_market.dto.UpdateProductRequest;
 import flab.rocket_market.entity.Categories;
 import flab.rocket_market.entity.Products;
 import flab.rocket_market.exception.CategoryNotFoundException;
@@ -27,6 +28,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
+    @RequiredRole("ROLE_ADMIN")
     public ProductResponse registerProduct(RegisterProductRequest productRequest) {
         Categories category = getCategory(productRequest.getCategoryId());
 
@@ -49,6 +51,7 @@ public class ProductService {
     }
 
     @Transactional
+    @RequiredRole("ROLE_ADMIN")
     public void updateProduct(UpdateProductRequest productRequest) {
         Products product = getProduct(productRequest.getProductId());
 
@@ -64,6 +67,7 @@ public class ProductService {
                 category);
     }
 
+    @RequiredRole("ROLE_ADMIN")
     public void deleteProduct(Long productId) {
         Products product = getProduct(productId);
 
