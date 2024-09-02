@@ -1,5 +1,6 @@
 package flab.rocket_market.controller;
 
+import flab.rocket_market.controller.dto.PageResponse;
 import flab.rocket_market.controller.dto.ProductResponse;
 import flab.rocket_market.controller.dto.RegisterProductRequest;
 import flab.rocket_market.controller.dto.UpdateProductRequest;
@@ -42,6 +43,25 @@ public class ProductController {
     public BaseResponse deleteProduct(@PathVariable("productId") Long productId) {
         productService.deleteProduct(productId);
         return BaseResponse.of(HttpStatus.NO_CONTENT, PRODUCT_DELETE_SUCCESS.getMessage());
+    }
+
+    @GetMapping
+    public BaseDataResponse<PageResponse<ProductResponse>> getProducts(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        PageResponse<ProductResponse> pageResponse = productService.getProducts(page, size);
+        return BaseDataResponse.of(HttpStatus.OK, PRODUCT_RETRIEVE_SUCCESS.getMessage(), pageResponse);
+    }
+
+    @GetMapping("/search")
+    public BaseDataResponse<PageResponse<ProductResponse>> searchProducts(
+            @RequestParam(name = "keyword") String keyword,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        PageResponse<ProductResponse> pageResponse = productService.searchProducts(keyword, page, size);
+        return BaseDataResponse.of(HttpStatus.OK, PRODUCT_RETRIEVE_SUCCESS.getMessage(), pageResponse);
     }
 }
 

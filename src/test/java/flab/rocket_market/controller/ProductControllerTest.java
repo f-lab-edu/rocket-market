@@ -1,6 +1,7 @@
 package flab.rocket_market.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import flab.rocket_market.controller.dto.PageResponse;
 import flab.rocket_market.controller.dto.ProductResponse;
 import flab.rocket_market.controller.dto.RegisterProductRequest;
 import flab.rocket_market.controller.dto.UpdateProductRequest;
@@ -15,6 +16,10 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
@@ -23,6 +28,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.resourceDetails;
@@ -30,8 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -311,6 +317,86 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.message").value(ProductNotFoundException.EXCEPTION.getError().getMessage()));
     }
 
+    @Test
+    @DisplayName("품목 전체 조회")
+    void getProducts() throws Exception {
+        //given
+        given(productService.getProducts(anyInt(), anyInt())).willReturn(getPageResponse(1L, 2L));
+
+        //when
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/products")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andDo(document("find-products",
+                        resourceDetails().description("품목 전체 조회"),
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+                                fieldWithPath("data.content[].productId").type(JsonFieldType.NUMBER).description("품목 ID"),
+                                fieldWithPath("data.content[].name").type(JsonFieldType.STRING).description("품목명"),
+                                fieldWithPath("data.content[].description").type(JsonFieldType.STRING).description("품목 설명"),
+                                fieldWithPath("data.content[].price").type(JsonFieldType.NUMBER).description("가격"),
+                                fieldWithPath("data.content[].categoryName").type(JsonFieldType.STRING).description("카테고리명"),
+                                fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일 (ISO 8601 형식)"),
+                                fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일 (ISO 8601 형식)"),
+                                fieldWithPath("data.pageNumber").type(JsonFieldType.NUMBER).description("페이지 번호"),
+                                fieldWithPath("data.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                                fieldWithPath("data.totalElement").type(JsonFieldType.NUMBER).description("전체 품목 개수"),
+                                fieldWithPath("data.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                                fieldWithPath("data.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부")
+                        )
+                ))
+                .andDo(print())
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    @DisplayName("품목 검색")
+    void searchProducts() throws Exception {
+        //given
+        given(productService.searchProducts(anyString(), anyInt(), anyInt())).willReturn(getPageResponse(1L, 2L));
+
+        //when
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/products/search")
+                        .param("keyword", "키워드")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andDo(document("find-products",
+                        resourceDetails().description("품목 전체 조회"),
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("keyword").description("검색 키워드"),
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+                                fieldWithPath("data.content[].productId").type(JsonFieldType.NUMBER).description("품목 ID"),
+                                fieldWithPath("data.content[].name").type(JsonFieldType.STRING).description("품목명"),
+                                fieldWithPath("data.content[].description").type(JsonFieldType.STRING).description("품목 설명"),
+                                fieldWithPath("data.content[].price").type(JsonFieldType.NUMBER).description("가격"),
+                                fieldWithPath("data.content[].categoryName").type(JsonFieldType.STRING).description("카테고리명"),
+                                fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일 (ISO 8601 형식)"),
+                                fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일 (ISO 8601 형식)"),
+                                fieldWithPath("data.pageNumber").type(JsonFieldType.NUMBER).description("페이지 번호"),
+                                fieldWithPath("data.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                                fieldWithPath("data.totalElement").type(JsonFieldType.NUMBER).description("전체 품목 개수"),
+                                fieldWithPath("data.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                                fieldWithPath("data.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부")
+                        )
+                ))
+                .andDo(print())
+                .andExpect(status().is2xxSuccessful());
+    }
+
     private RegisterProductRequest getRegisterProductRequest() {
         RegisterProductRequest request = RegisterProductRequest.builder()
                 .name("품목명")
@@ -342,5 +428,25 @@ class ProductControllerTest {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    private PageResponse<ProductResponse> getPageResponse(Long ...productId) {
+        List<ProductResponse> list = new ArrayList<>();
+        for (Long id : productId) {
+            ProductResponse product = createProduct(id);
+            list.add(product);
+        }
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ProductResponse> productsPage = new PageImpl<>(list, pageable, list.size());
+
+        return new PageResponse<>(
+                list,
+                productsPage.getNumber(),
+                productsPage.getSize(),
+                productsPage.getTotalElements(),
+                productsPage.getTotalPages(),
+                productsPage.isLast()
+        );
     }
 }

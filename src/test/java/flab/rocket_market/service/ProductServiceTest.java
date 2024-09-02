@@ -1,5 +1,6 @@
 package flab.rocket_market.service;
 
+import flab.rocket_market.controller.dto.PageResponse;
 import flab.rocket_market.controller.dto.ProductResponse;
 import flab.rocket_market.controller.dto.RegisterProductRequest;
 import flab.rocket_market.controller.dto.UpdateProductRequest;
@@ -16,12 +17,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -35,6 +43,9 @@ class ProductServiceTest {
     private static final String DEFAULT_PRODUCT_NAME = "티셔츠";
     private static final String DEFAULT_PRODUCT_DESCRIPTION = "티셔츠 입니다.";
     private static final BigDecimal DEFAULT_PRODUCT_PRICE = BigDecimal.valueOf(5000);
+
+    private static final int PAGE = 0;
+    private static final int SIZE = 10;
 
     @Mock
     private CategoryRepository categoryRepository;
@@ -195,6 +206,41 @@ class ProductServiceTest {
         assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(productId));
     }
 
+    @Test
+    @DisplayName("품목 전체 조회")
+    void getProducts() {
+        //given
+        Pageable pageable = PageRequest.of(PAGE, SIZE);
+        Page<Products> productsPage = createProductsPage(pageable, 1L, 2L);
+
+        when(productRepository.findAll(pageable)).thenReturn(productsPage);
+
+        //when
+        PageResponse<ProductResponse> result = productService.getProducts(PAGE, SIZE);
+
+        //then
+        assertEquals(result.getTotalElement(), 2);
+        assertProductResponse(result.getContent().get(0), 1L, DEFAULT_PRODUCT_NAME, defaultCategory.getName());
+    }
+
+    @Test
+    @DisplayName("품목 검색")
+    void searchProducts() {
+        //given
+        String keyword = DEFAULT_PRODUCT_NAME;
+        Pageable pageable = PageRequest.of(PAGE, SIZE);
+        Page<Products> productsPage = createProductsPage(pageable, 1L, 2L);
+
+        when(productRepository.findByNameContaining(keyword, pageable)).thenReturn(productsPage);
+
+        //when
+        PageResponse<ProductResponse> result = productService.searchProducts(keyword, PAGE, SIZE);
+
+        //then
+        assertEquals(result.getTotalElement(), 2);
+        assertProductResponse(result.getContent().get(0), 1L, DEFAULT_PRODUCT_NAME, defaultCategory.getName());
+    }
+
     private Categories createCategory(Long categoryId, String name, String description) {
         return Categories.builder()
                 .categoryId(categoryId)
@@ -232,6 +278,18 @@ class ProductServiceTest {
                 .price(price)
                 .categoryId(categoryId)
                 .build();
+    }
+
+    private Page<Products> createProductsPage(Pageable pageable, Long ...productId) {
+        List<Products> list = new ArrayList<>();
+
+        for (Long id : productId) {
+            Products product = createProduct(id, defaultCategory);
+            list.add(product);
+        }
+
+        Page<Products> productsPage = new PageImpl<>(list, pageable, list.size());
+        return productsPage;
     }
 
     private void assertProductResponse(ProductResponse response, Long expectedProductId, String expectedName, String expectedCategoryName) {
