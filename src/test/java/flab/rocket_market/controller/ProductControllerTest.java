@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -70,17 +71,7 @@ class ProductControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(parameterWithName("productId").description("품목 ID")),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
-                                fieldWithPath("data.productId").type(JsonFieldType.NUMBER).description("품목 ID"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("품목명"),
-                                fieldWithPath("data.description").type(JsonFieldType.STRING).description("품목 설명"),
-                                fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("data.categoryName").type(JsonFieldType.STRING).description("카테고리명"),
-                                fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성일 (ISO 8601 형식)"),
-                                fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정일 (ISO 8601 형식)")
-                        )
+                        responseFields(getProductResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
@@ -102,23 +93,8 @@ class ProductControllerTest {
                             resourceDetails().description("품목 생성"),
                             preprocessRequest(prettyPrint()),
                             preprocessResponse(prettyPrint()),
-                            requestFields(
-                                    fieldWithPath("name").type(JsonFieldType.STRING).description("품목명"),
-                                    fieldWithPath("description").type(JsonFieldType.STRING).description("품목 설명"),
-                                    fieldWithPath("price").type(JsonFieldType.NUMBER).description("가격"),
-                                    fieldWithPath("categoryId").type(JsonFieldType.NUMBER).description("카테고리 ID")
-                            ),
-                            responseFields(
-                                    fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                    fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
-                                    fieldWithPath("data.productId").type(JsonFieldType.NUMBER).description("품목 ID"),
-                                    fieldWithPath("data.name").type(JsonFieldType.STRING).description("품목명"),
-                                    fieldWithPath("data.description").type(JsonFieldType.STRING).description("품목 설명"),
-                                    fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("가격"),
-                                    fieldWithPath("data.categoryName").type(JsonFieldType.STRING).description("카테고리명"),
-                                    fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성일"),
-                                    fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정일")
-                            )
+                            requestFields(getProductRequestFields()),
+                            responseFields(getProductResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
@@ -132,6 +108,9 @@ class ProductControllerTest {
 
         willDoNothing().given(productService).updateProduct(any());
 
+        List<FieldDescriptor> productRequestFields = getProductRequestFields();
+        productRequestFields.add(fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"));
+
         //when
         mockMvc.perform(RestDocumentationRequestBuilders.patch("/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -140,17 +119,8 @@ class ProductControllerTest {
                         resourceDetails().description("품목 수정"),
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestFields(
-                                fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"),
-                                fieldWithPath("name").type(JsonFieldType.STRING).description("품목명"),
-                                fieldWithPath("description").type(JsonFieldType.STRING).description("품목 설명"),
-                                fieldWithPath("price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("categoryId").type(JsonFieldType.NUMBER).description("카테고리 ID")
-                        ),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지")
-                        )
+                        requestFields(productRequestFields),
+                        responseFields(getBaseResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
@@ -169,10 +139,7 @@ class ProductControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(parameterWithName("productId").description("품목 ID")),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지")
-                        )
+                        responseFields(getBaseResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
@@ -191,10 +158,7 @@ class ProductControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(parameterWithName("productId").description("품목 ID")),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("에러 메시지")
-                        )
+                        responseFields(getBaseResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(jsonPath("$.message").value(ProductNotFoundException.EXCEPTION.getError().getMessage()));
@@ -216,16 +180,8 @@ class ProductControllerTest {
                         resourceDetails().description("품목 생성 실패 - 카테고리 없음"),
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestFields(
-                                fieldWithPath("name").type(JsonFieldType.STRING).description("품목명"),
-                                fieldWithPath("description").type(JsonFieldType.STRING).description("품목 설명"),
-                                fieldWithPath("price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("categoryId").type(JsonFieldType.NUMBER).description("카테고리 ID")
-                        ),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("에러 메시지")
-                        )
+                        requestFields(getProductRequestFields()),
+                        responseFields(getBaseResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(jsonPath("$.message").value(CategoryNotFoundException.EXCEPTION.getError().getMessage()));
@@ -239,6 +195,9 @@ class ProductControllerTest {
 
         willThrow(ProductNotFoundException.EXCEPTION).given(productService).updateProduct(any());
 
+        List<FieldDescriptor> productRequestFields = getProductRequestFields();
+        productRequestFields.add(fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"));
+
         //when
         mockMvc.perform(RestDocumentationRequestBuilders.patch("/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -247,17 +206,8 @@ class ProductControllerTest {
                         resourceDetails().description("품목 수정 실패 - 품목 없음"),
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestFields(
-                                fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"),
-                                fieldWithPath("name").type(JsonFieldType.STRING).description("품목명"),
-                                fieldWithPath("description").type(JsonFieldType.STRING).description("품목 설명"),
-                                fieldWithPath("price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("categoryId").type(JsonFieldType.NUMBER).description("카테고리 ID")
-                        ),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지")
-                        )
+                        requestFields(productRequestFields),
+                        responseFields(getBaseResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(jsonPath("$.message").value(ProductNotFoundException.EXCEPTION.getError().getMessage()));
@@ -271,6 +221,9 @@ class ProductControllerTest {
 
         willThrow(CategoryNotFoundException.EXCEPTION).given(productService).updateProduct(any());
 
+        List<FieldDescriptor> productRequestFields = getProductRequestFields();
+        productRequestFields.add(fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"));
+
         //when
         mockMvc.perform(RestDocumentationRequestBuilders.patch("/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -279,17 +232,8 @@ class ProductControllerTest {
                         resourceDetails().description("품목 수정 실패 - 카테고리 없음"),
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestFields(
-                                fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"),
-                                fieldWithPath("name").type(JsonFieldType.STRING).description("품목명"),
-                                fieldWithPath("description").type(JsonFieldType.STRING).description("품목 설명"),
-                                fieldWithPath("price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("categoryId").type(JsonFieldType.NUMBER).description("카테고리 ID")
-                        ),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지")
-                        )
+                        requestFields(productRequestFields),
+                        responseFields(getBaseResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(jsonPath("$.message").value(CategoryNotFoundException.EXCEPTION.getError().getMessage()));
@@ -308,10 +252,7 @@ class ProductControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(parameterWithName("productId").description("품목 ID")),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지")
-                        )
+                        responseFields(getBaseResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(jsonPath("$.message").value(ProductNotFoundException.EXCEPTION.getError().getMessage()));
@@ -335,22 +276,7 @@ class ProductControllerTest {
                                 parameterWithName("page").description("페이지 번호"),
                                 parameterWithName("size").description("페이지 크기")
                         ),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
-                                fieldWithPath("data.content[].productId").type(JsonFieldType.NUMBER).description("품목 ID"),
-                                fieldWithPath("data.content[].name").type(JsonFieldType.STRING).description("품목명"),
-                                fieldWithPath("data.content[].description").type(JsonFieldType.STRING).description("품목 설명"),
-                                fieldWithPath("data.content[].price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("data.content[].categoryName").type(JsonFieldType.STRING).description("카테고리명"),
-                                fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일 (ISO 8601 형식)"),
-                                fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일 (ISO 8601 형식)"),
-                                fieldWithPath("data.pageNumber").type(JsonFieldType.NUMBER).description("페이지 번호"),
-                                fieldWithPath("data.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
-                                fieldWithPath("data.totalElement").type(JsonFieldType.NUMBER).description("전체 품목 개수"),
-                                fieldWithPath("data.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
-                                fieldWithPath("data.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부")
-                        )
+                        responseFields(getPageResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
@@ -376,22 +302,7 @@ class ProductControllerTest {
                                 parameterWithName("page").description("페이지 번호"),
                                 parameterWithName("size").description("페이지 크기")
                         ),
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
-                                fieldWithPath("data.content[].productId").type(JsonFieldType.NUMBER).description("품목 ID"),
-                                fieldWithPath("data.content[].name").type(JsonFieldType.STRING).description("품목명"),
-                                fieldWithPath("data.content[].description").type(JsonFieldType.STRING).description("품목 설명"),
-                                fieldWithPath("data.content[].price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("data.content[].categoryName").type(JsonFieldType.STRING).description("카테고리명"),
-                                fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일 (ISO 8601 형식)"),
-                                fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일 (ISO 8601 형식)"),
-                                fieldWithPath("data.pageNumber").type(JsonFieldType.NUMBER).description("페이지 번호"),
-                                fieldWithPath("data.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
-                                fieldWithPath("data.totalElement").type(JsonFieldType.NUMBER).description("전체 품목 개수"),
-                                fieldWithPath("data.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
-                                fieldWithPath("data.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부")
-                        )
+                        responseFields(getPageResponseFields())
                 ))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
@@ -448,5 +359,50 @@ class ProductControllerTest {
                 productsPage.getTotalPages(),
                 productsPage.isLast()
         );
+    }
+
+    private List<FieldDescriptor> getProductRequestFields() {
+        return List.of(
+            fieldWithPath("name").type(JsonFieldType.STRING).description("품목명"),
+            fieldWithPath("description").type(JsonFieldType.STRING).description("품목 설명"),
+            fieldWithPath("price").type(JsonFieldType.NUMBER).description("가격"),
+            fieldWithPath("categoryId").type(JsonFieldType.NUMBER).description("카테고리 ID")
+        );
+    }
+
+    private List<FieldDescriptor> getBaseResponseFields() {
+        return List.of(
+            fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태 코드"),
+            fieldWithPath("message").type(JsonFieldType.STRING).description("메시지")
+        );
+    }
+
+    private List<FieldDescriptor> getProductResponseFields() {
+        List<FieldDescriptor> list = getBaseResponseFields();
+        list.add(fieldWithPath("data.productId").type(JsonFieldType.NUMBER).description("품목 ID"));
+        list.add(fieldWithPath("data.name").type(JsonFieldType.STRING).description("품목명"));
+        list.add(fieldWithPath("data.description").type(JsonFieldType.STRING).description("품목 설명"));
+        list.add(fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("가격"));
+        list.add(fieldWithPath("data.categoryName").type(JsonFieldType.STRING).description("카테고리명"));
+        list.add(fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성일 (ISO 8601 형식)"));
+        list.add(fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정일 (ISO 8601 형식)"));
+        return list;
+    }
+
+    private List<FieldDescriptor> getPageResponseFields() {
+        List<FieldDescriptor> list = getBaseResponseFields();
+        list.add(fieldWithPath("data.content[].productId").type(JsonFieldType.NUMBER).description("품목 ID"));
+        list.add(fieldWithPath("data.content[].name").type(JsonFieldType.STRING).description("품목명"));
+        list.add(fieldWithPath("data.content[].description").type(JsonFieldType.STRING).description("품목 설명"));
+        list.add(fieldWithPath("data.content[].price").type(JsonFieldType.NUMBER).description("가격"));
+        list.add(fieldWithPath("data.content[].categoryName").type(JsonFieldType.STRING).description("카테고리명"));
+        list.add(fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일 (ISO 8601 형식)"));
+        list.add(fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일 (ISO 8601 형식)"));
+        list.add(fieldWithPath("data.pageNumber").type(JsonFieldType.NUMBER).description("페이지 번호"));
+        list.add(fieldWithPath("data.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"));
+        list.add(fieldWithPath("data.totalElement").type(JsonFieldType.NUMBER).description("전체 품목 개수"));
+        list.add(fieldWithPath("data.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"));
+        list.add(fieldWithPath("data.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"));
+        return list;
     }
 }
