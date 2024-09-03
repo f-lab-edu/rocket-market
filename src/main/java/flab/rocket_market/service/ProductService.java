@@ -12,6 +12,8 @@ import flab.rocket_market.exception.ProductNotFoundException;
 import flab.rocket_market.repository.CategoryRepository;
 import flab.rocket_market.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +30,10 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
+    private static final String PRODUCTS = "products";
+
     @RequiredRole("ROLE_ADMIN")
+    @CacheEvict(cacheNames = PRODUCTS, allEntries = true)
     public ProductResponse registerProduct(RegisterProductRequest productRequest) {
         Categories category = getCategory(productRequest.getCategoryId());
 
@@ -52,6 +57,7 @@ public class ProductService {
 
     @Transactional
     @RequiredRole("ROLE_ADMIN")
+    @CacheEvict(cacheNames = PRODUCTS, allEntries = true)
     public void updateProduct(UpdateProductRequest productRequest) {
         Products product = getProduct(productRequest.getProductId());
 
@@ -68,12 +74,14 @@ public class ProductService {
     }
 
     @RequiredRole("ROLE_ADMIN")
+    @CacheEvict(cacheNames = PRODUCTS, allEntries = true)
     public void deleteProduct(Long productId) {
         Products product = getProduct(productId);
 
         productRepository.delete(product);
     }
 
+    @Cacheable(cacheNames = PRODUCTS, key = "#p0 + '-' + #p1")
     public PageResponse<ProductResponse> getProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Products> productsPage = productRepository.findAll(pageable);
