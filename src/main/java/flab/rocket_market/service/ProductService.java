@@ -81,7 +81,7 @@ public class ProductService {
         productRepository.delete(product);
     }
 
-    @Cacheable(cacheNames = PRODUCTS, key = "#p0 + '-' + #p1")
+    @Cacheable(cacheNames = PRODUCTS, key = "'getProducts-' + #p0 + '-' + #p1")
     public PageResponse<ProductResponse> getProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Products> productsPage = productRepository.findAll(pageable);
