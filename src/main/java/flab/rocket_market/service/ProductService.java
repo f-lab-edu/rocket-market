@@ -91,7 +91,7 @@ public class ProductService {
 
     public PageResponse<ProductResponse> searchProducts(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Products> productsPage = productRepository.findByNameContaining(keyword, pageable);
+        Page<Products> productsPage = productRepository.searchByKeyword(keyword + "*", pageable);
 
         return getPageResponse(productsPage);
     }
