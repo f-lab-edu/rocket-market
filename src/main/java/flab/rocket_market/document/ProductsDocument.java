@@ -1,4 +1,4 @@
-package flab.rocket_market.entity;
+package flab.rocket_market.document;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

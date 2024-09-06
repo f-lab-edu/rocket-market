@@ -1,6 +1,6 @@
 package flab.rocket_market.repository;
 
-import flab.rocket_market.entity.ProductsDocument;
+import flab.rocket_market.document.ProductsDocument;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
