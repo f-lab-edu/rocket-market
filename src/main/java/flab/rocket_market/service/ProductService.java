@@ -30,6 +30,8 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
+    private final ProductsSearchService productsSearchService;
+
     private static final String PRODUCTS = "products";
 
     @RequiredRole("ROLE_ADMIN")
@@ -91,9 +93,8 @@ public class ProductService {
 
     public PageResponse<ProductResponse> searchProducts(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Products> productsPage = productRepository.searchByKeyword(keyword + "*", pageable);
 
-        return getPageResponse(productsPage);
+        return productsSearchService.searchProductsFromElasticsearch(keyword, pageable);
     }
 
     private Products getProduct(Long productId) {
