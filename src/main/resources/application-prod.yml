@@ -34,3 +34,9 @@ springdoc:
   swagger-ui:
     url: /docs/rocket-market-api-0.0.1.json
     path: /docs/swagger
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
