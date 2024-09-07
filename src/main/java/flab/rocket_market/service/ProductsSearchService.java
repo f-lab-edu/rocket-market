@@ -7,6 +7,7 @@ import flab.rocket_market.document.ProductsDocument;
 import flab.rocket_market.repository.ProductsSearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,8 @@ public class ProductsSearchService {
 
     private final ProductsSearchRepository productsSearchRepository;
 
-    public PageResponse<ProductResponse> searchProductsFromElasticsearch(String keyword, Pageable pageable) {
+    public PageResponse<ProductResponse> searchProductsFromElasticsearch(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         Page<ProductsDocument> productsDocumentPage = productsSearchRepository.findByNameContaining(keyword, pageable);
 
         return getPageResponse(productsDocumentPage);

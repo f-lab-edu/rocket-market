@@ -30,8 +30,6 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
-    private final ProductsSearchService productsSearchService;
-
     private static final String PRODUCTS = "products";
 
     @RequiredRole("ROLE_ADMIN")
@@ -91,10 +89,14 @@ public class ProductService {
         return getPageResponse(productsPage);
     }
 
+    /**
+     * MySQL FULLTEXT 인덱스를 사용한 키워드 검색
+     * */
     public PageResponse<ProductResponse> searchProducts(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+        Page<Products> productsPage = productRepository.searchByKeyword(keyword + "*", pageable);
 
-        return productsSearchService.searchProductsFromElasticsearch(keyword, pageable);
+        return getPageResponse(productsPage);
     }
 
     private Products getProduct(Long productId) {

@@ -7,6 +7,7 @@ import flab.rocket_market.dto.UpdateProductRequest;
 import flab.rocket_market.global.response.BaseDataResponse;
 import flab.rocket_market.global.response.BaseResponse;
 import flab.rocket_market.service.ProductService;
+import flab.rocket_market.service.ProductsSearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import static flab.rocket_market.global.message.MessageConstants.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductsSearchService productsSearchService;
 
     @PostMapping
     public BaseDataResponse<ProductResponse> registerProduct(@Valid @RequestBody RegisterProductRequest productRequest) {
@@ -60,7 +62,7 @@ public class ProductController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        PageResponse<ProductResponse> pageResponse = productService.searchProducts(keyword, page, size);
+        PageResponse<ProductResponse> pageResponse = productsSearchService.searchProductsFromElasticsearch(keyword, page, size);
         return BaseDataResponse.of(HttpStatus.OK, PRODUCT_RETRIEVE_SUCCESS.getMessage(), pageResponse);
     }
 }
