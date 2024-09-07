@@ -8,6 +8,7 @@ import flab.rocket_market.dto.UpdateProductRequest;
 import flab.rocket_market.exception.CategoryNotFoundException;
 import flab.rocket_market.exception.ProductNotFoundException;
 import flab.rocket_market.service.ProductService;
+import flab.rocket_market.service.ProductsSearchService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +52,9 @@ class ProductControllerTest {
 
     @MockBean
     protected ProductService productService;
+
+    @MockBean
+    protected ProductsSearchService productsSearchService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -108,7 +112,7 @@ class ProductControllerTest {
 
         willDoNothing().given(productService).updateProduct(any());
 
-        List<FieldDescriptor> productRequestFields = getProductRequestFields();
+        List<FieldDescriptor> productRequestFields = new ArrayList<>(getProductRequestFields());
         productRequestFields.add(fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"));
 
         //when
@@ -195,7 +199,7 @@ class ProductControllerTest {
 
         willThrow(ProductNotFoundException.EXCEPTION).given(productService).updateProduct(any());
 
-        List<FieldDescriptor> productRequestFields = getProductRequestFields();
+        List<FieldDescriptor> productRequestFields = new ArrayList<>(getProductRequestFields());
         productRequestFields.add(fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"));
 
         //when
@@ -221,7 +225,7 @@ class ProductControllerTest {
 
         willThrow(CategoryNotFoundException.EXCEPTION).given(productService).updateProduct(any());
 
-        List<FieldDescriptor> productRequestFields = getProductRequestFields();
+        List<FieldDescriptor> productRequestFields = new ArrayList<>(getProductRequestFields());
         productRequestFields.add(fieldWithPath("productId").type(JsonFieldType.NUMBER).description("품목 ID"));
 
         //when
@@ -286,7 +290,7 @@ class ProductControllerTest {
     @DisplayName("품목 검색")
     void searchProducts() throws Exception {
         //given
-        given(productService.searchProducts(anyString(), anyInt(), anyInt())).willReturn(getPageResponse(1L, 2L));
+        given(productsSearchService.searchProductsFromElasticsearch(anyString(), anyInt(), anyInt())).willReturn(getPageResponse(1L, 2L));
 
         //when
         mockMvc.perform(RestDocumentationRequestBuilders.get("/products/search")
@@ -378,7 +382,7 @@ class ProductControllerTest {
     }
 
     private List<FieldDescriptor> getProductResponseFields() {
-        List<FieldDescriptor> list = getBaseResponseFields();
+        List<FieldDescriptor> list = new ArrayList<>(getBaseResponseFields());
         list.add(fieldWithPath("data.productId").type(JsonFieldType.NUMBER).description("품목 ID"));
         list.add(fieldWithPath("data.name").type(JsonFieldType.STRING).description("품목명"));
         list.add(fieldWithPath("data.description").type(JsonFieldType.STRING).description("품목 설명"));
@@ -390,7 +394,7 @@ class ProductControllerTest {
     }
 
     private List<FieldDescriptor> getPageResponseFields() {
-        List<FieldDescriptor> list = getBaseResponseFields();
+        List<FieldDescriptor> list = new ArrayList<>(getBaseResponseFields());
         list.add(fieldWithPath("data.content[].productId").type(JsonFieldType.NUMBER).description("품목 ID"));
         list.add(fieldWithPath("data.content[].name").type(JsonFieldType.STRING).description("품목명"));
         list.add(fieldWithPath("data.content[].description").type(JsonFieldType.STRING).description("품목 설명"));
