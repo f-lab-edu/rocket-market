@@ -3,7 +3,7 @@ package flab.rocket_market.service;
 import flab.rocket_market.dto.PageResponse;
 import flab.rocket_market.dto.ProductResponse;
 import flab.rocket_market.entity.Products;
-import flab.rocket_market.entity.ProductsDocument;
+import flab.rocket_market.document.ProductsDocument;
 import flab.rocket_market.repository.ProductsSearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

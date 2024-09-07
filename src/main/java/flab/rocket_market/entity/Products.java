@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@EntityListeners(ProductsEntityListener.class)
 public class Products {
 
     @Id
