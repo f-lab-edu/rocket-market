@@ -1,0 +1,37 @@
+{
+  "properties": {
+
+    "productId": {
+      "type": "keyword"
+    },
+
+    "name": {
+      "type": "text",
+      "analyzer": "korean"
+    },
+
+    "description": {
+      "type": "text",
+      "analyzer": "korean"
+    },
+
+    "price": {
+      "type": "float"
+    },
+
+    "categoryName": {
+      "type": "text",
+      "analyzer": "korean"
+    },
+
+    "createdAt": {
+      "type": "date",
+      "format": "uuuu-MM-dd'T'HH:mm:ss"
+    },
+
+    "updatedAt": {
+      "type": "date",
+      "format": "uuuu-MM-dd'T'HH:mm:ss"
+    }
+  }
+}
