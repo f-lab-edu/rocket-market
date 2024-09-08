@@ -231,7 +231,7 @@ class ProductServiceTest {
         Pageable pageable = PageRequest.of(PAGE, SIZE);
         Page<Products> productsPage = createProductsPage(pageable, 1L, 2L);
 
-        when(productRepository.findByNameContaining(keyword, pageable)).thenReturn(productsPage);
+        when(productRepository.searchByKeyword(keyword + "*", pageable)).thenReturn(productsPage);
 
         //when
         PageResponse<ProductResponse> result = productService.searchProducts(keyword, PAGE, SIZE);
