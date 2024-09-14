@@ -1,4 +1,4 @@
-package flab.rocket_market.document;
+package flab.rocket_market.products.document;
 
 import lombok.Getter;
 import lombok.Setter;
