@@ -1,8 +1,8 @@
 package flab.rocket_market.aop;
 
-import flab.rocket_market.dto.User;
-import flab.rocket_market.exception.AccessDeniedException;
-import flab.rocket_market.service.UserService;
+import flab.rocket_market.users.dto.User;
+import flab.rocket_market.users.exception.AccessDeniedException;
+import flab.rocket_market.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
