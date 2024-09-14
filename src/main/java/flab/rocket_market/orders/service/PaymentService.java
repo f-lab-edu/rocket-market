@@ -33,7 +33,7 @@ public class PaymentService {
     /**
      * 추후 외부 결제 API 호출
      */
-    private boolean callPaymentAPI() {
+    public boolean callPaymentAPI() {
         return true;
     }
 }
