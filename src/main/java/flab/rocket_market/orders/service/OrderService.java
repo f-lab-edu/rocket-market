@@ -9,18 +9,17 @@ import flab.rocket_market.orders.entity.Inventory;
 import flab.rocket_market.orders.entity.OrderItems;
 import flab.rocket_market.orders.entity.Orders;
 import flab.rocket_market.orders.entity.Payment;
-import flab.rocket_market.products.entity.Products;
 import flab.rocket_market.orders.enums.OrderStatus;
 import flab.rocket_market.orders.exception.OutOfStockException;
-import flab.rocket_market.products.exception.ProductNotFoundException;
-import flab.rocket_market.users.exception.UserNotFoundException;
 import flab.rocket_market.orders.repository.InventoryRepository;
 import flab.rocket_market.orders.repository.OrderItemRepository;
 import flab.rocket_market.orders.repository.OrderRepository;
+import flab.rocket_market.products.entity.Products;
+import flab.rocket_market.products.exception.ProductNotFoundException;
 import flab.rocket_market.products.repository.ProductRepository;
+import flab.rocket_market.users.exception.UserNotFoundException;
 import flab.rocket_market.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -56,15 +54,10 @@ public class OrderService {
 
             //재고 감소
             inventory.decrease(orderItem.getQuantity());
-
-            log.info("재고 감소 orderItem.id={}, orderItem.quantity={}", orderItem.getProductId(), orderItem.getQuantity());
         }
 
         //결제 API 호출
         Payment payment = paymentService.processPayment(orderRequest.getPaymentInfo());
-
-        log.info("결재 완료 payment.id={}, payment.type={}", payment.getPaymentId(), payment.getType());
-
 
         //주문 데이터 생성 및 저장
         Orders orders = orderRepository.save(Orders.builder()
@@ -77,8 +70,6 @@ public class OrderService {
                 .receiverPhone(orderRequest.getReceiverPhone())
                 .status(OrderStatus.PENDING)
                 .build());
-
-        log.info("주문 데이터 생성 완료 orders.id={}", orders.getOrderId());
 
         List<OrderItemResponse> items = new ArrayList<>();
 
@@ -93,7 +84,6 @@ public class OrderService {
                     .price(products.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())))
                     .build());
 
-            log.info("주문 아이템 생성 완료 orderItems.id={}", orderItems.getOrderItemId());
             items.add(OrderItemResponse.of(orderItems));
         }
 
