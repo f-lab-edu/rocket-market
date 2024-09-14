@@ -1,10 +1,11 @@
-package flab.rocket_market.service;
+package flab.rocket_market.products.service;
 
-import flab.rocket_market.document.ProductsDocument;
-import flab.rocket_market.dto.PageResponse;
-import flab.rocket_market.dto.ProductResponse;
-import flab.rocket_market.entity.Categories;
-import flab.rocket_market.repository.ProductsSearchRepository;
+import flab.rocket_market.products.document.ProductsDocument;
+import flab.rocket_market.products.dto.PageResponse;
+import flab.rocket_market.products.dto.ProductResponse;
+import flab.rocket_market.products.entity.Categories;
+import flab.rocket_market.products.repository.ProductsSearchRepository;
+import flab.rocket_market.products.service.ProductsSearchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
