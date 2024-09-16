@@ -1,16 +1,16 @@
-package flab.rocket_market.service;
+package flab.rocket_market.products.service;
 
 import flab.rocket_market.aop.RequiredRole;
-import flab.rocket_market.dto.PageResponse;
-import flab.rocket_market.dto.ProductResponse;
-import flab.rocket_market.dto.RegisterProductRequest;
-import flab.rocket_market.dto.UpdateProductRequest;
-import flab.rocket_market.entity.Categories;
-import flab.rocket_market.entity.Products;
-import flab.rocket_market.exception.CategoryNotFoundException;
-import flab.rocket_market.exception.ProductNotFoundException;
-import flab.rocket_market.repository.CategoryRepository;
-import flab.rocket_market.repository.ProductRepository;
+import flab.rocket_market.products.dto.PageResponse;
+import flab.rocket_market.products.dto.ProductResponse;
+import flab.rocket_market.products.dto.RegisterProductRequest;
+import flab.rocket_market.products.dto.UpdateProductRequest;
+import flab.rocket_market.products.entity.Categories;
+import flab.rocket_market.products.entity.Products;
+import flab.rocket_market.products.exception.CategoryNotFoundException;
+import flab.rocket_market.products.exception.ProductNotFoundException;
+import flab.rocket_market.products.repository.CategoryRepository;
+import flab.rocket_market.products.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

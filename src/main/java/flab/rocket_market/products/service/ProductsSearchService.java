@@ -1,10 +1,10 @@
-package flab.rocket_market.service;
+package flab.rocket_market.products.service;
 
-import flab.rocket_market.dto.PageResponse;
-import flab.rocket_market.dto.ProductResponse;
-import flab.rocket_market.entity.Products;
-import flab.rocket_market.document.ProductsDocument;
-import flab.rocket_market.repository.ProductsSearchRepository;
+import flab.rocket_market.products.dto.PageResponse;
+import flab.rocket_market.products.dto.ProductResponse;
+import flab.rocket_market.products.entity.Products;
+import flab.rocket_market.products.document.ProductsDocument;
+import flab.rocket_market.products.repository.ProductsSearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
