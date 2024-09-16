@@ -25,6 +25,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +73,23 @@ class ProductsSearchServiceTest {
         assertEquals(result.getTotalElement(), 2);
         assertProductResponse(result.getContent().get(0), 1L, DEFAULT_PRODUCT_NAME, defaultCategory.getName());
 
+    }
+
+    @Test
+    @DisplayName("품목 검색 - 검색 결과 없음")
+    void searchProductsFromElasticsearchNoResults() {
+        //given
+        String keyword = DEFAULT_PRODUCT_NAME;
+        Pageable pageable = PageRequest.of(PAGE, SIZE);
+        Page<ProductsDocument> emptyPage = Page.empty(pageable);
+
+        when(productsSearchRepository.findByNameContaining(keyword, pageable)).thenReturn(emptyPage);
+
+        //when
+        PageResponse<ProductResponse> result = productsSearchService.searchProductsFromElasticsearch(keyword, PAGE, SIZE);
+
+        //then
+        assertTrue(result.getContent().isEmpty());
     }
 
     private Categories createCategory(Long categoryId, String name, String description) {
