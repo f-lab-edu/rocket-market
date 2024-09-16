@@ -1,6 +1,6 @@
-package flab.rocket_market.service;
+package flab.rocket_market.users.service;
 
-import flab.rocket_market.dto.User;
+import flab.rocket_market.users.dto.User;
 import org.springframework.stereotype.Service;
 
 @Service

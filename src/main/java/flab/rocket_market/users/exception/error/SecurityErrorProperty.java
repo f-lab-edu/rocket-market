@@ -1,4 +1,4 @@
-package flab.rocket_market.exception.error;
+package flab.rocket_market.users.exception.error;
 
 import flab.rocket_market.global.exception.error.ErrorProperty;
 import lombok.Getter;
