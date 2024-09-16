@@ -1,10 +1,10 @@
-package flab.rocket_market.dto;
+package flab.rocket_market.products.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import flab.rocket_market.entity.Products;
+import flab.rocket_market.products.entity.Products;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

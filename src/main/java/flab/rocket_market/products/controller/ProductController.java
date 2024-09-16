@@ -1,13 +1,13 @@
-package flab.rocket_market.controller;
+package flab.rocket_market.products.controller;
 
-import flab.rocket_market.dto.PageResponse;
-import flab.rocket_market.dto.ProductResponse;
-import flab.rocket_market.dto.RegisterProductRequest;
-import flab.rocket_market.dto.UpdateProductRequest;
+import flab.rocket_market.products.dto.PageResponse;
+import flab.rocket_market.products.dto.ProductResponse;
+import flab.rocket_market.products.dto.RegisterProductRequest;
+import flab.rocket_market.products.dto.UpdateProductRequest;
 import flab.rocket_market.global.response.BaseDataResponse;
 import flab.rocket_market.global.response.BaseResponse;
-import flab.rocket_market.service.ProductService;
-import flab.rocket_market.service.ProductsSearchService;
+import flab.rocket_market.products.service.ProductService;
+import flab.rocket_market.products.service.ProductsSearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
