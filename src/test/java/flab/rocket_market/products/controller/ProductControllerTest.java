@@ -1,14 +1,15 @@
-package flab.rocket_market.controller;
+package flab.rocket_market.products.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import flab.rocket_market.dto.PageResponse;
-import flab.rocket_market.dto.ProductResponse;
-import flab.rocket_market.dto.RegisterProductRequest;
-import flab.rocket_market.dto.UpdateProductRequest;
-import flab.rocket_market.exception.CategoryNotFoundException;
-import flab.rocket_market.exception.ProductNotFoundException;
-import flab.rocket_market.service.ProductService;
-import flab.rocket_market.service.ProductsSearchService;
+import flab.rocket_market.products.dto.PageResponse;
+import flab.rocket_market.products.dto.ProductResponse;
+import flab.rocket_market.products.dto.RegisterProductRequest;
+import flab.rocket_market.products.dto.UpdateProductRequest;
+import flab.rocket_market.products.exception.CategoryNotFoundException;
+import flab.rocket_market.products.exception.ProductNotFoundException;
+import flab.rocket_market.products.controller.ProductController;
+import flab.rocket_market.products.service.ProductService;
+import flab.rocket_market.products.service.ProductsSearchService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
