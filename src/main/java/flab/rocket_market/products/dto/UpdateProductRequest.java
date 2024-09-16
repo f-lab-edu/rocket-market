@@ -1,4 +1,4 @@
-package flab.rocket_market.dto;
+package flab.rocket_market.products.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
