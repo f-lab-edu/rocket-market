@@ -10,7 +10,6 @@ import flab.rocket_market.products.exception.CategoryNotFoundException;
 import flab.rocket_market.products.exception.ProductNotFoundException;
 import flab.rocket_market.products.repository.CategoryRepository;
 import flab.rocket_market.products.repository.ProductRepository;
-import flab.rocket_market.products.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
