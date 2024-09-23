@@ -4,8 +4,10 @@ import flab.rocket_market.products.document.ProductsDocument;
 import flab.rocket_market.products.dto.PageResponse;
 import flab.rocket_market.products.dto.ProductResponse;
 import flab.rocket_market.products.entity.Categories;
+import flab.rocket_market.products.exception.ProductSearchException;
 import flab.rocket_market.products.repository.ProductsSearchRepository;
 import flab.rocket_market.products.service.ProductsSearchService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -91,6 +95,21 @@ class ProductsSearchServiceTest {
         //then
         assertTrue(result.getContent().isEmpty());
     }
+
+    @Test
+    @DisplayName("품목 검색 - 엘라스틱서치 오류")
+    void searchProductsFromElasticsearchError() {
+        //given
+        String keyword = DEFAULT_PRODUCT_NAME;
+        Pageable pageable = PageRequest.of(PAGE, SIZE);
+        Page<ProductsDocument> emptyPage = Page.empty(pageable);
+
+        when(productsSearchRepository.findByNameContaining(keyword, pageable)).thenThrow(UncategorizedElasticsearchException.class);
+
+        //when & then
+        assertThrows(ProductSearchException.class, () -> productsSearchService.searchProductsFromElasticsearch(keyword, PAGE, SIZE));
+    }
+
 
     private Categories createCategory(Long categoryId, String name, String description) {
         return Categories.builder()
