@@ -1,7 +1,9 @@
 package flab.rocket_market.orders.service;
 
 import flab.rocket_market.orders.dto.PaymentRequest;
+import flab.rocket_market.orders.dto.PaymentResponse;
 import flab.rocket_market.orders.entity.Payment;
+import flab.rocket_market.orders.exception.PaymentNotFoundException;
 import flab.rocket_market.orders.exception.PaymentProcessingException;
 import flab.rocket_market.orders.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,19 @@ public class PaymentService {
                 .build());
 
         return payment;
+    }
+
+    public void cancelPayment(PaymentResponse paymentResponse) {
+        boolean isSuccessful = callPaymentAPI();
+
+        if (!isSuccessful) {
+            throw PaymentProcessingException.EXCEPTION;
+        }
+
+        Payment payment = paymentRepository.findById(paymentResponse.getPaymentId())
+                .orElseThrow(() -> PaymentNotFoundException.EXCEPTION);
+
+        payment.failedPayment();
     }
 
     /**
