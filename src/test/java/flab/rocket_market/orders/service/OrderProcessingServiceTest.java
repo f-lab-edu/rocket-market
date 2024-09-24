@@ -1,20 +1,27 @@
 package flab.rocket_market.orders.service;
 
 import flab.rocket_market.orders.dto.OrderItemRequest;
-import flab.rocket_market.orders.dto.OrderItemResponse;
 import flab.rocket_market.orders.dto.OrderRequest;
 import flab.rocket_market.orders.dto.OrderResponse;
 import flab.rocket_market.orders.dto.PaymentRequest;
 import flab.rocket_market.orders.dto.PaymentResponse;
+import flab.rocket_market.orders.entity.Inventory;
 import flab.rocket_market.orders.entity.OrderItems;
 import flab.rocket_market.orders.entity.Orders;
 import flab.rocket_market.orders.entity.Payment;
 import flab.rocket_market.orders.enums.OrderStatus;
-import flab.rocket_market.orders.exception.OrderFailedException;
+import flab.rocket_market.orders.exception.OutOfStockException;
+import flab.rocket_market.orders.exception.PaymentProcessingException;
+import flab.rocket_market.orders.repository.InventoryRepository;
+import flab.rocket_market.orders.repository.OrderItemRepository;
+import flab.rocket_market.orders.repository.OrderRepository;
+import flab.rocket_market.orders.repository.PaymentRepository;
 import flab.rocket_market.products.entity.Categories;
 import flab.rocket_market.products.entity.Products;
+import flab.rocket_market.products.exception.ProductNotFoundException;
+import flab.rocket_market.products.repository.ProductRepository;
 import flab.rocket_market.users.entity.Users;
-import org.junit.jupiter.api.Assertions;
+import flab.rocket_market.users.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,30 +32,46 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OrderServiceTest {
+class OrderProcessingServiceTest {
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private InventoryRepository inventoryRepository;
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private PaymentService paymentService;
 
     @Mock
-    private OrderProcessingService orderProcessingService;
+    private PaymentRepository paymentRepository;
 
     @InjectMocks
-    private OrderService orderService;
+    private OrderProcessingService orderProcessingService;
 
     private Categories categories;
     private Products product;
+    private Inventory inventory;
     private OrderItemRequest itemRequest;
     private PaymentRequest paymentRequest;
     private OrderRequest orderRequest;
@@ -57,13 +80,12 @@ class OrderServiceTest {
     private Orders orders;
     private OrderItems orderItems;
     private PaymentResponse paymentResponse;
-    private List<OrderItemResponse> orderItemResponses;
-    private OrderResponse orderResponse;
 
     @BeforeEach
     void setup() {
         categories = createCategories();
         product = createProducts(categories);
+        inventory = createInventory(product);
         itemRequest = createOrderItemRequest();
         paymentRequest = createPaymentRequest();
         orderRequest = createOrderRequest(itemRequest, paymentRequest);
@@ -72,36 +94,110 @@ class OrderServiceTest {
         orders = createOrders(user, payment, orderRequest);
         orderItems = createOrderItems(orders, product, itemRequest);
         paymentResponse = PaymentResponse.of(payment);
-        orderItemResponses = createOrderItemResponse(orderItems);
-        orderResponse = OrderResponse.of(orders, orderItemResponses, paymentResponse);
     }
 
     @Test
-    @DisplayName("주문 데이터 저장 로직 호출")
-    void createOrder() {
+    @DisplayName("재고 감소 및 결제")
+    void processPayment() {
         //given
-        when(orderProcessingService.processOrder(orderRequest, paymentResponse)).thenReturn(orderResponse);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(inventoryRepository.findByProducts(product)).thenReturn(inventory);
+        when(paymentService.processPayment(paymentRequest)).thenReturn(payment);
 
         //when
-        OrderResponse result = orderService.createOrder(orderRequest, paymentResponse);
+        PaymentResponse result = orderProcessingService.processPayment(orderRequest);
 
         //then
+        assertThat(inventory.getQuantity()).isEqualTo(9); // 재고 감소 확인
+        verify(paymentService, times(1)).processPayment(any(PaymentRequest.class));
+
+        assertThat(result.getTotalPrice()).isEqualTo(paymentRequest.getTotalPrice());
+        assertThat(result.getType()).isEqualTo(paymentRequest.getType());
+    }
+
+    @Test
+    @DisplayName("주문 데이터 생성")
+    void processOrder() {
+        //given
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(orderRepository.save(any(Orders.class))).thenReturn(orders);
+        when(orderItemRepository.save(any(OrderItems.class))).thenReturn(orderItems);
+        when(paymentRepository.findById(any())).thenReturn(Optional.of(payment));
+
+        //when
+        OrderResponse result = orderProcessingService.processOrder(orderRequest, paymentResponse);
+
+        //then
+        verify(orderRepository, times(1)).save(any(Orders.class));
+        verify(orderItemRepository, times(1)).save(any(OrderItems.class));
+
         assertThat(result.getTotalPrice()).isEqualTo(paymentRequest.getTotalPrice());
         assertThat(result.getReceiverName()).isEqualTo(orderRequest.getReceiverName());
         assertThat(result.getPaymentInfo().getType()).isEqualTo(paymentRequest.getType());
     }
 
     @Test
-    @DisplayName("주문 데이터 저장 실패 시 복구 작업")
-    void recover() {
+    @DisplayName("재고 부족으로 인한 주문 실패")
+    void processPaymentOrderOutOfStock() {
         //given
-        doNothing().when(paymentService).cancelPayment(paymentResponse);
-        doNothing().when(orderProcessingService).restoreInventory(orderRequest.getItems());
+        inventory.decrease(inventory.getQuantity()); // 재고를 0으로 설정
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(inventoryRepository.findByProducts(product)).thenReturn(inventory);
 
         //when & then
-        Assertions.assertThrows(OrderFailedException.class, () -> orderService.recover(new Exception(), orderRequest, paymentResponse));
-        verify(paymentService, times(1)).cancelPayment(paymentResponse);
-        verify(orderProcessingService, times(1)).restoreInventory(orderRequest.getItems());
+        assertThrows(OutOfStockException.class, () -> orderProcessingService.processPayment(orderRequest));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 상품으로 인한 주문 실패")
+    void processPaymentOrderProductNotFound() {
+        //given
+        when(productRepository.findById(1L)).thenReturn(Optional.empty());
+
+        //when & then
+        assertThrows(ProductNotFoundException.class, () -> orderProcessingService.processPayment(orderRequest));
+    }
+
+    @Test
+    @DisplayName("결제 실패로 인한 주문 실패")
+    void processPaymentOrderPaymentError() {
+        //given
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(inventoryRepository.findByProducts(product)).thenReturn(inventory);
+        when(paymentService.processPayment(paymentRequest)).thenThrow(PaymentProcessingException.EXCEPTION);
+
+        //when & then
+        assertThrows(PaymentProcessingException.class, () -> orderProcessingService.processPayment(orderRequest));
+    }
+
+    @Test
+    @DisplayName("재고 수량 감소")
+    void decreaseInventory() {
+        //given
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(inventoryRepository.findByProducts(product)).thenReturn(inventory);
+
+        //when
+        orderProcessingService.decreaseInventory(orderRequest.getItems());
+
+        //then
+        assertThat(inventory.getQuantity()).isEqualTo(9);
+    }
+
+    @Test
+    @DisplayName("재고 수량 복구")
+    void restoreInventory() {
+        //given
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(inventoryRepository.findByProducts(product)).thenReturn(inventory);
+
+        //when
+        orderProcessingService.restoreInventory(orderRequest.getItems());
+
+        //then
+        assertThat(inventory.getQuantity()).isEqualTo(11);
     }
 
     private OrderItems createOrderItems(Orders orders, Products product, OrderItemRequest itemRequest) {
@@ -168,6 +264,15 @@ class OrderServiceTest {
                 .build();
     }
 
+    private Inventory createInventory(Products product) {
+        return Inventory.builder()
+                .products(product)
+                .inventoryId(1L)
+                .quantity(10)
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
     private Products createProducts(Categories categories) {
         return Products.builder()
                 .productId(1L)
@@ -188,9 +293,4 @@ class OrderServiceTest {
                 .build();
     }
 
-    private List<OrderItemResponse> createOrderItemResponse(OrderItems orderItems) {
-        ArrayList<OrderItemResponse> list = new ArrayList<>();
-        list.add(OrderItemResponse.of(orderItems));
-        return list;
-    }
 }
