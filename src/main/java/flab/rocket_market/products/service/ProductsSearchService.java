@@ -1,14 +1,17 @@
 package flab.rocket_market.products.service;
 
+import flab.rocket_market.products.document.ProductsDocument;
 import flab.rocket_market.products.dto.PageResponse;
 import flab.rocket_market.products.dto.ProductResponse;
 import flab.rocket_market.products.entity.Products;
-import flab.rocket_market.products.document.ProductsDocument;
+import flab.rocket_market.products.exception.ProductSearchException;
 import flab.rocket_market.products.repository.ProductsSearchRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,15 +19,22 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductsSearchService {
 
     private final ProductsSearchRepository productsSearchRepository;
 
     public PageResponse<ProductResponse> searchProductsFromElasticsearch(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ProductsDocument> productsDocumentPage = productsSearchRepository.findByNameContaining(keyword, pageable);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<ProductsDocument> productsDocumentPage = productsSearchRepository.findByNameContaining(keyword, pageable);
 
-        return getPageResponse(productsDocumentPage);
+            return getPageResponse(productsDocumentPage);
+
+        } catch (UncategorizedElasticsearchException e) {
+            log.error("error", e);
+            throw ProductSearchException.EXCEPTION;
+        }
     }
 
     public void saveProductsToElasticsearch(Products products) {
