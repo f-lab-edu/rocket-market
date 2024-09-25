@@ -73,15 +73,27 @@ pipeline {
                          passwordVariable: 'DOCKER_HUB_PW')]) {
 
                          sh """
-                              ssh -o StrictHostKeyChecking=no ubuntu@${EC2_PUBLIC_IP} '
-                              echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_ID" --password-stdin &&
-                              docker pull ${DOCKER_HUB_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} &&
-                              docker ps -a --filter name=rocket-market-app -q | xargs -r docker rm -f &&
-                              docker run -d --name rocket-market-app -p 8080:8080 \
-                                  -e SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} \
-                                  -e SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} \
-                                  -e SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD} \
-                                  ${DOCKER_HUB_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
+                             ssh -o StrictHostKeyChecking=no ubuntu@${EC2_PUBLIC_IP_1} '
+                             echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_ID" --password-stdin &&
+                             docker pull ${DOCKER_HUB_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} &&
+                             docker ps -a --filter name=rocket-market-app -q | xargs -r docker rm -f &&
+                             docker run -d --name rocket-market-app -p 8080:8080 \
+                                 -e SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} \
+                                 -e SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} \
+                                 -e SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD} \
+                                 ${DOCKER_HUB_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
+                         """
+
+                         sh """
+                             ssh -o StrictHostKeyChecking=no ubuntu@${EC2_PUBLIC_IP_2} '
+                             echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_ID" --password-stdin &&
+                             docker pull ${DOCKER_HUB_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} &&
+                             docker ps -a --filter name=rocket-market-app -q | xargs -r docker rm -f &&
+                             docker run -d --name rocket-market-app -p 8080:8080 \
+                                 -e SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} \
+                                 -e SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} \
+                                 -e SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD} \
+                                 ${DOCKER_HUB_ID}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
                          """
                      }
                  }
