@@ -37,4 +37,8 @@ public class Payment {
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    public void failedPayment() {
+        this.status = false;
+    }
 }
