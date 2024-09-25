@@ -1,8 +1,10 @@
 package flab.rocket_market.orders.controller;
 
+import flab.rocket_market.global.response.BaseDataResponse;
 import flab.rocket_market.orders.dto.OrderRequest;
 import flab.rocket_market.orders.dto.OrderResponse;
-import flab.rocket_market.global.response.BaseDataResponse;
+import flab.rocket_market.orders.dto.PaymentResponse;
+import flab.rocket_market.orders.service.OrderProcessingService;
 import flab.rocket_market.orders.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +22,13 @@ import static flab.rocket_market.global.message.MessageConstants.ORDER_CREATE_SU
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderProcessingService orderProcessingService;
 
     @PostMapping
     public BaseDataResponse<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
-        OrderResponse order = orderService.createOrder(orderRequest);
+        PaymentResponse paymentResponse = orderProcessingService.processPayment(orderRequest);
+        OrderResponse order = orderService.createOrder(orderRequest, paymentResponse);
+
         return BaseDataResponse.of(HttpStatus.CREATED, ORDER_CREATE_SUCCESS.getMessage(), order);
     }
 }
