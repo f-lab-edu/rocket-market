@@ -1,7 +1,7 @@
 package flab.rocket_market.orders.entity;
 
-import flab.rocket_market.products.entity.Products;
 import flab.rocket_market.orders.exception.OutOfStockException;
+import flab.rocket_market.products.entity.Products;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,14 +37,27 @@ public class Inventory {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public void add(int quantity) {
+    public synchronized void increase(int quantity) {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         this.quantity += quantity;
     }
 
-    public void decrease(int quantity) {
+    public synchronized void decrease(int quantity) {
         if (this.quantity - quantity < 0) {
             throw OutOfStockException.EXCEPTION;
         }
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         this.quantity -= quantity;
     }
 }
