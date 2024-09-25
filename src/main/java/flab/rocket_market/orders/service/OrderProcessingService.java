@@ -79,14 +79,9 @@ public class OrderProcessingService {
     public List<OrderItemResponse> saveOrderItems(List<OrderItemRequest> orderItemRequests, Orders orders) {
         List<OrderItemResponse> items = new ArrayList<>();
 
-        int cnt = 0;
         for (OrderItemRequest orderItem : orderItemRequests) {
             Products products = productRepository.findById(orderItem.getProductId())
                     .orElseThrow(() -> ProductNotFoundException.EXCEPTION);
-
-            if(cnt++ == 1) {
-                throw new RuntimeException();
-            }
 
             OrderItems orderItems = orderItemRepository.save(OrderItems.builder()
                     .orders(orders)
@@ -101,6 +96,7 @@ public class OrderProcessingService {
         return items;
     }
 
+    @Transactional
     public void decreaseInventory(List<OrderItemRequest> orderItemRequests) {
         for (OrderItemRequest orderItem : orderItemRequests) {
             Products products = productRepository.findById(orderItem.getProductId())
