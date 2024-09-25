@@ -8,8 +8,10 @@ import flab.rocket_market.orders.dto.OrderResponse;
 import flab.rocket_market.orders.dto.PaymentRequest;
 import flab.rocket_market.orders.dto.PaymentResponse;
 import flab.rocket_market.orders.enums.OrderStatus;
+import flab.rocket_market.orders.exception.OrderFailedException;
 import flab.rocket_market.orders.exception.OutOfStockException;
 import flab.rocket_market.orders.exception.PaymentProcessingException;
+import flab.rocket_market.orders.service.OrderProcessingService;
 import flab.rocket_market.orders.service.OrderService;
 import flab.rocket_market.products.exception.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +57,9 @@ class OrderControllerTest {
     @MockBean
     private OrderService orderService;
 
+    @MockBean
+    private OrderProcessingService orderProcessingService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -82,7 +87,8 @@ class OrderControllerTest {
     @DisplayName("상품 주문")
     void createOrder() throws Exception {
         //given
-        given(orderService.createOrder(any())).willReturn(orderResponse);
+        given(orderProcessingService.processPayment(any())).willReturn(paymentResponse);
+        given(orderService.createOrder(any(), any())).willReturn(orderResponse);
 
         //when & then
         mockMvc.perform(RestDocumentationRequestBuilders.post("/orders")
@@ -103,7 +109,7 @@ class OrderControllerTest {
     @DisplayName("재고 부족으로 인한 주문 실패")
     void createOrderOutOfStock() throws Exception {
         //given
-        given(orderService.createOrder(any())).willThrow(OutOfStockException.EXCEPTION);
+        given(orderProcessingService.processPayment(any())).willThrow(OutOfStockException.EXCEPTION);
 
         //when & then
         mockMvc.perform(RestDocumentationRequestBuilders.post("/orders")
@@ -123,7 +129,7 @@ class OrderControllerTest {
     @DisplayName("존재하지 않는 상품으로 인한 주문 실패")
     void createOrderProductNotFound() throws Exception {
         //given
-        given(orderService.createOrder(any())).willThrow(ProductNotFoundException.EXCEPTION);
+        given(orderProcessingService.processPayment(any())).willThrow(ProductNotFoundException.EXCEPTION);
 
         //when & then
         mockMvc.perform(RestDocumentationRequestBuilders.post("/orders")
@@ -143,7 +149,7 @@ class OrderControllerTest {
     @DisplayName("결제 실패로 인한 주문 실패")
     void createOrderPaymentError() throws Exception {
         //given
-        given(orderService.createOrder(any())).willThrow(PaymentProcessingException.EXCEPTION);
+        given(orderProcessingService.processPayment(any())).willThrow(PaymentProcessingException.EXCEPTION);
 
         //when & then
         mockMvc.perform(RestDocumentationRequestBuilders.post("/orders")
@@ -157,6 +163,27 @@ class OrderControllerTest {
                         responseFields(getBaseResponseFields())
                 )).andDo(print())
                 .andExpect(jsonPath("$.message").value(PaymentProcessingException.EXCEPTION.getError().getMessage()));
+    }
+
+    @Test
+    @DisplayName("주문 데이터 저장 실패로 인한 주문 실패")
+    void createOrderOrderFailedException() throws Exception {
+        //given
+        given(orderProcessingService.processPayment(any())).willReturn(paymentResponse);
+        given(orderService.createOrder(any(), any())).willThrow(OrderFailedException.EXCEPTION);
+
+        //when & then
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
+                .andDo(document("create-order-payment-error",
+                        resourceDetails().description("주문 데이터 저장 실패로 인한 주문 실패"),
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(getOrderRequestFields()),
+                        responseFields(getBaseResponseFields())
+                )).andDo(print())
+                .andExpect(jsonPath("$.message").value(OrderFailedException.EXCEPTION.getError().getMessage()));
     }
 
     private OrderRequest createOrderRequest(OrderItemRequest itemRequest, PaymentRequest paymentRequest) {
