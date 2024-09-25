@@ -38,12 +38,6 @@ public class Inventory {
     private LocalDateTime updatedAt;
 
     public synchronized void increase(int quantity) {
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
         this.quantity += quantity;
     }
 
@@ -51,13 +45,6 @@ public class Inventory {
         if (this.quantity - quantity < 0) {
             throw OutOfStockException.EXCEPTION;
         }
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
         this.quantity -= quantity;
     }
 }
