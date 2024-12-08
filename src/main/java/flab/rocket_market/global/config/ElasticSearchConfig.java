@@ -12,7 +12,7 @@ public class ElasticSearchConfig extends ElasticsearchConfiguration {
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
-                .connectedTo("211.188.54.235:9200")
+                .connectedTo("13.125.113.227:9200")
                 .build();
     }
 }
