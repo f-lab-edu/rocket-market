@@ -31,7 +31,7 @@ pipeline {
             steps {
                 sh 'chmod +x ./gradlew'
                 echo 'Build With gradlew'
-                sh './gradlew clean build'
+                sh './gradlew clean openapi3 build'
             }
             post {
                 failure {
